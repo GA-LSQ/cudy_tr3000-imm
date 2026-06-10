@@ -4,6 +4,27 @@
 uci set luci.main.mediaurlbase='/luci-static/argon'
 uci commit luci
 
+# USB 网络接口
+uci set network.USB=interface
+uci set network.USB.proto='dhcp'
+uci set network.USB.device='eth2'
+
+# DHCP
+uci set dhcp.USB=dhcp
+uci set dhcp.USB.interface='USB'
+uci set dhcp.USB.ignore='1'
+
+# 防火墙加入 WAN 区域
+uci del firewall.cfg03dc81.network 2>/dev/null
+uci add_list firewall.cfg03dc81.network='wan'
+uci add_list firewall.cfg03dc81.network='wan6'
+uci add_list firewall.cfg03dc81.network='USB'
+
+# 提交所有更改
+uci commit network
+uci commit dhcp
+uci commit firewall
+
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
 
