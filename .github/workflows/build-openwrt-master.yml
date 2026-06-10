@@ -18,7 +18,12 @@ on:
           - v24.10.6
           - v24.10.5
           - v24.10.4
+          - v25.12.3
+          - v25.12.4
+          - v25.12.5
+          - v25.12.6
           - openwrt-24.10
+          - openwrt-25.12
       commit:
         description: '指定源码commit（可选，必须对应版本号）'
         required: false
