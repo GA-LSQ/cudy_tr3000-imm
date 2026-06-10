@@ -1,4 +1,4 @@
-name: CUDY_TR3000_V1_114M_IM_MASTER
+name: CUDY_TR3000_V1_112M_IM_24.10
 
 on:
   workflow_dispatch:
@@ -7,14 +7,14 @@ on:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt.git
-  REPO_BRANCH: master
+  REPO_BRANCH: v24.10.6
   CONFIG_FILE: OpenWrt-TR3000.config
   DIY_P1_SH: OpenWrt-part1.sh
   DIY_P2_SH: OpenWrt-part2.sh
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
-  FIRMWARE_TAG: CUDY_TR3000_V1_114M_IM_MASTER
+  FIRMWARE_TAG: CUDY_TR3000_V1_112M_IM_24.10
   TZ: Asia/Shanghai
 
 permissions:
@@ -158,39 +158,6 @@ jobs:
         ls -lh
         du -h $OPENWRT_PATH/files
         tree -ifh $OPENWRT_PATH/files
-
-    # - name: Download sing-box
-    #   run: |
-    #     cd $OPENWRT_PATH
-    #     LATEST_VERSION=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-    #     curl -LO https://github.com/SagerNet/sing-box/releases/download/v$LATEST_VERSION/sing-box-$LATEST_VERSION-linux-arm64.tar.gz
-    #     mkdir sing_box_temp
-    #     tar -zxvf sing-box-$LATEST_VERSION-linux-arm64.tar.gz
-        
-    #     # -0：无损 -2：标准 -3: 较高 -9:最高 --best：最佳
-    #     upx -3 sing-box-$LATEST_VERSION-linux-arm64/sing-box
-
-    #     mkdir -p $OPENWRT_PATH/files/usr/bin
-    #     mv sing-box-$LATEST_VERSION-linux-arm64/sing-box $OPENWRT_PATH/files/usr/bin/
-    #     ls -lh
-    #     du -h $OPENWRT_PATH/files
-    #     tree -ifh $OPENWRT_PATH/files
-        
-    # - name: Download AdGuardHome
-    #   run: |
-    #     cd $OPENWRT_PATH
-    #     LATEST_VERSION=$(curl -s https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-    #     curl -LO https://github.com/AdguardTeam/AdGuardHome/releases/download/v$LATEST_VERSION/AdGuardHome_linux_arm64.tar.gz
-    #     tar -zxvf AdGuardHome_linux_arm64.tar.gz
-    #     mv AdGuardHome AdGuardHome_temp
-    #     ls -lh  AdGuardHome_temp
-    #      # -0：无损 -2：标准 -3: 较高 -9:最高 --best：最佳
-    #     upx -3 AdGuardHome_temp/AdGuardHome
-    #     ls -lh  AdGuardHome_temp
-    #     mv AdGuardHome_temp/AdGuardHome $OPENWRT_PATH/files/usr/bin/
-    #     ls -lh 
-    #     du -h $OPENWRT_PATH/files
-    #     tree -ifh $OPENWRT_PATH/files
         
     - name: Download DL Package
       run: |
@@ -287,7 +254,7 @@ jobs:
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🚀 内核版本: ${{ env.KERNEL }}
-          - 🌐 默认地址: 192.168.9.1
+          - 🌐 默认地址: 192.168.10.1
           - 🔑 默认密码: password
           ### 🧊 固件版本
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
