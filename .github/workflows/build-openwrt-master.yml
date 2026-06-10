@@ -285,12 +285,19 @@ jobs:
           cd $OPENWRT_PATH/bin/targets/*/*
           cat sha256sums
           cp $OPENWRT_PATH/.config build.config
-          mv -f $OPENWRT_PATH/bin/packages/*/*/*.apk packages
-          tar -zcf Packages.tar.gz packages
+          mkdir -p packages
+          find $OPENWRT_PATH/bin/packages/ -name "*.ipk" -exec mv {} packages/ \; 2>/dev/null || true
+          find $OPENWRT_PATH/bin/packages/ -name "*.apk" -exec mv {} packages/ \; 2>/dev/null || true
+          if [ -n "$(ls -A packages 2>/dev/null)" ]; then
+            tar -zcf Packages.tar.gz packages
+          else
+            echo ">>> 未找到软件包，跳过打包"
+          fi
           rm -rf packages feeds.buildinfo version.buildinfo
-          ls -lh $OPENWRT_PATH/build_dir/target-*/linux-*/linux-*
+          ls -lh $OPENWRT_PATH/build_dir/target-*/linux-*/linux-* 2>/dev/null || true
           echo "KERNEL=$(cat *.manifest | grep ^kernel | cut -d- -f2 | tr -d ' ')" >> $GITHUB_ENV
           echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+
 
       - name: Upload Firmware To Artifact
         if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
