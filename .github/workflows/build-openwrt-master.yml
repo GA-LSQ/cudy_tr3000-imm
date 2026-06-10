@@ -244,11 +244,11 @@ jobs:
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
 
-      - name: Check hack patch
-        run: |
-          cd $OPENWRT_PATH
-          ls target/linux/generic/hack-6.12/
-          grep -r "scons" feeds/ package/ --include="Makefile" || true
+#      - name: Check hack patch
+#        run: |
+#          cd $OPENWRT_PATH
+#          ls target/linux/generic/hack-6.12/
+#          grep -r "scons" feeds/ package/ --include="Makefile" || true
 
       - name: Compile Firmware
         id: compile
