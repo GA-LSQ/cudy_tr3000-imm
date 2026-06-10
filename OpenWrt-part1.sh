@@ -38,9 +38,9 @@ function git_sparse_clone() {
 
 
 # top install
-sed -i '1i\
-src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main\
-src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main' feeds.conf.default
+#sed -i '1i\
+#src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main\
+#src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main' feeds.conf.default
 
 # turboacc
 curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh
@@ -49,10 +49,10 @@ curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.
 git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
 
 # 应用过滤
-git clone -b v6.1.8  https://github.com/destan19/OpenAppFilter package/OpenAppFilter
+#git clone -b v6.1.8  https://github.com/destan19/OpenAppFilter package/OpenAppFilter
 
 # 钉钉推送
-git clone --depth=1 https://github.com/zzsj0928/luci-app-pushbot package/luci-app-pushbot
+#git clone --depth=1 https://github.com/zzsj0928/luci-app-pushbot package/luci-app-pushbot
 
 # 端口转发 A luci app of socat for nftables
 git_sparse_clone main https://github.com/chenmozhijin/luci-app-socat luci-app-socat
