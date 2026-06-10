@@ -17,7 +17,7 @@ git clone https://github.com/timsaya/openwrt-bandix package/openwrt-bandix
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
-git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
+#git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
 #使用iStoreOS banner
 curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/istoreos/istoreos/refs/heads/istoreos-22.03/package/base-files/files/etc/banner
