@@ -17,6 +17,9 @@ env:
   FIRMWARE_TAG: CUDY_TR3000_V1_114M_IM_MASTER
   TZ: Asia/Shanghai
 
+permissions:
+  contents: write
+
 jobs:
   Build:
     runs-on: ubuntu-22.04
