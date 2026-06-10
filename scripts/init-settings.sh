@@ -25,6 +25,11 @@ uci commit network
 uci commit dhcp
 uci commit firewall
 
+
+# 删除构建时添加的 feeds 源（运行时不需要）
+sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
+
+
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
 
