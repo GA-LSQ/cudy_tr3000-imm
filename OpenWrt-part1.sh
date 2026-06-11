@@ -92,7 +92,7 @@ git clone --depth=1  https://github.com/eamonxg/luci-app-aurora-config package/l
 
 git_sparse_clone openwrt-25.12  # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
- luci-theme-argon luci-app-argon-config
+
 
 # natmapt
 #git clone --depth 1 --branch master --single-branch --no-checkout https://github.com/muink/openwrt-stuntman.git package/stuntman
