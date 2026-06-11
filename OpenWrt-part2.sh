@@ -92,6 +92,23 @@ echo "dllkids feed (opkg) integration completed."
 # =================================================
 
 
+  #集成预编译ipk（支持tar.gz格式）
+   IPK_FILE="$GITHUB_WORKSPACE/package/luci-app-button-automation_0_all.ipk"
+   if [ -f "$IPK_FILE" ]; then
+       echo ">>> 发现ipk，正在解包集成..."
+       mkdir -p /tmp/ipk_extract
+       cd /tmp/ipk_extract
+       tar -xzf "$IPK_FILE"                     # 解出 control.tar.gz 和 data.tar.gz
+       # 确保目标目录存在
+       mkdir -p "$GITHUB_WORKSPACE/openwrt/files"
+       tar -xzf data.tar.gz -C "$GITHUB_WORKSPACE/openwrt/files"
+       cd /
+       rm -rf /tmp/ipk_extract
+       echo ">>> 集成完成，插件已放入 openwrt/files/"
+   else
+       echo ">>> 未找到ipk文件，跳过"
+   fi
+
 
 
 # Temperature
