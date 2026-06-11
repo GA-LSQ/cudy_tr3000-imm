@@ -101,153 +101,99 @@ echo "dllkids feed (opkg) integration completed."
 #   4. 目录形式     — package/luci-app-xxx/ 直接放源码（含 Makefile）
 # ============================================
 
-PKG_DIR="$GITHUB_WORKSPACE/package/"
-OPENWRT_PKG="$GITHUB_WORKSPACE/openwrt/package"
-FILES_DIR="$GITHUB_WORKSPACE/openwrt/files"
-mkdir -p "$FILES_DIR" "$OPENWRT_PKG"
+      - name: Load Custom Configuration
+        run: |
+          [ -e files ] && mv files $OPENWRT_PATH/files
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
+          chmod +x $DIY_P2_SH
+          cd $OPENWRT_PATH
+          $GITHUB_WORKSPACE/$DIY_P2_SH
 
-found=0
+          # ---- 集成预编译包（全格式兼容） ----
+          mkdir -p $OPENWRT_PATH/files $OPENWRT_PATH/package
+          PKG_DIR="$GITHUB_WORKSPACE/package"
+          [ ! -d "$PKG_DIR" ] && echo ">>> package/ 不存在，跳过" && exit 0
 
-# ---- 1. 处理 ipk 文件 ----
-integrate_ipk() {
-    local ipk_file="$1"
-    echo ">>> [IPK] 正在集成: $(basename "$ipk_file")"
-    local work_dir
-    work_dir=$(mktemp -d)
-    cd "$work_dir"
-    ar x "$ipk_file"
-    for f in data.tar.*; do
-        [ -f "$f" ] && tar -xf "$f" -C "$FILES_DIR"
-    done
-    cd /
-    rm -rf "$work_dir"
-    echo ">>> [IPK] 完成: $(basename "$ipk_file")"
-}
+          integrate_ipk() {
+            echo ">>> 集成 ipk: $(basename "$1")"
+            TMP=$(mktemp -d)
+            cd "$TMP"
+            ar x "$1"
+            for f in data.tar.*; do
+              [ -f "$f" ] && tar -xf "$f" -C $OPENWRT_PATH/files
+            done
+            cd / && rm -rf "$TMP"
+          }
 
-# ---- 2. 处理 apk 文件 ----
-integrate_apk() {
-    local apk_file="$1"
-    echo ">>> [APK] 正在集成: $(basename "$apk_file")"
-    tar -xf "$apk_file" -C "$FILES_DIR" \
-        --exclude='./.PKGINFO' --exclude='./.SIGN.*' --exclude='./.INSTALL' \
-        --exclude='.PKGINFO' --exclude='.SIGN.*' --exclude='.INSTALL'
-    echo ">>> [APK] 完成: $(basename "$apk_file")"
-}
+          integrate_apk() {
+            echo ">>> 集成 apk: $(basename "$1")"
+            tar -xf "$1" -C $OPENWRT_PATH/files \
+              --exclude='.PKGINFO' --exclude='.SIGN.*' --exclude='.INSTALL'
+          }
 
-# ---- 3. 处理 tar.gz 文件（自动判断内容） ----
-integrate_targz() {
-    local tgz_file="$1"
-    local base_name
-    base_name=$(basename "$tgz_file" .tar.gz)
-    echo ">>> [TAR.GZ] 正在处理: $(basename "$tgz_file")"
+          integrate_targz() {
+            echo ">>> 集成 tar.gz: $(basename "$1")"
+            TMP=$(mktemp -d)
+            tar -xzf "$1" -C "$TMP"
+            # 如果 tar.gz 里面包含 ipk，按 ipk 处理
+            found_inner=0
+            for inner in "$TMP"/*.ipk; do
+              [ -f "$inner" ] || continue
+              found_inner=1
+              integrate_ipk "$inner"
+            done
+            # 如果 tar.gz 里面包含 apk，按 apk 处理
+            [ "$found_inner" -eq 0 ] && for inner in "$TMP"/*.apk; do
+              [ -f "$inner" ] || continue
+              found_inner=1
+              integrate_apk "$inner"
+            done
+            # 都不是，直接解压到 files
+            if [ "$found_inner" -eq 0 ]; then
+              tar -xzf "$1" -C $OPENWRT_PATH/files
+            fi
+            rm -rf "$TMP"
+          }
 
-    local work_dir
-    work_dir=$(mktemp -d)
-    tar -xzf "$tgz_file" -C "$work_dir"
+          integrate_tarxz() {
+            echo ">>> 集成 tar.xz: $(basename "$1")"
+            tar -xJf "$1" -C $OPENWRT_PATH/files
+          }
 
-    # 情况A：tar.gz 里包含 ipk 文件 → 按 ipk 方式集成
-    local ipk_count
-    ipk_count=$(find "$work_dir" -name "*.ipk" | wc -l)
-    if [ "$ipk_count" -gt 0 ]; then
-        echo ">>> [TAR.GZ] 发现 $ipk_count 个 ipk 文件，按 IPK 方式集成"
-        find "$work_dir" -name "*.ipk" | while read -r ipk; do
-            integrate_ipk "$ipk"
-        done
-        rm -rf "$work_dir"
-        return
-    fi
+          integrate_tarzst() {
+            echo ">>> 集成 tar.zst: $(basename "$1")"
+            tar --zstd -xf "$1" -C $OPENWRT_PATH/files
+          }
 
-    # 情况B：tar.gz 里包含 apk 文件 → 按 apk 方式集成
-    local apk_count
-    apk_count=$(find "$work_dir" -name "*.apk" | wc -l)
-    if [ "$apk_count" -gt 0 ]; then
-        echo ">>> [TAR.GZ] 发现 $apk_count 个 apk 文件，按 APK 方式集成"
-        find "$work_dir" -name "*.apk" | while read -r apk; do
-            integrate_apk "$apk"
-        done
-        rm -rf "$work_dir"
-        return
-    fi
+          integrate_zip() {
+            echo ">>> 集成 zip: $(basename "$1")"
+            unzip -o "$1" -d $OPENWRT_PATH/files
+          }
 
-    # 情况C：tar.gz 里包含 Makefile → 当作源码包，放入 package/
-    if [ -f "$work_dir/Makefile" ]; then
-        echo ">>> [TAR.GZ] 检测到源码包（含 Makefile），放入 package/$base_name/"
-        mv "$work_dir" "$OPENWRT_PKG/$base_name"
-        echo ">>> [TAR.GZ] 源码集成完成: package/$base_name/"
-        return
-    fi
-
-    # 情况D：tar.gz 里是子目录，检查子目录内是否有 Makefile
-    local sub_dir
-    sub_dir=$(find "$work_dir" -maxdepth 2 -name "Makefile" -printf '%h\n' | head -1)
-    if [ -n "$sub_dir" ]; then
-        local pkg_name
-        pkg_name=$(basename "$sub_dir")
-        echo ">>> [TAR.GZ] 检测到源码子目录: $pkg_name，放入 package/$pkg_name/"
-        cp -r "$sub_dir" "$OPENWRT_PKG/$pkg_name"
-        echo ">>> [TAR.GZ] 源码集成完成: package/$pkg_name/"
-        rm -rf "$work_dir"
-        return
-    fi
-
-    # 情况E：都不是，当作 files 直接解压
-    echo ">>> [TAR.GZ] 未检测到 ipk/apk/Makefile，作为 files 解压"
-    tar -xzf "$tgz_file" -C "$FILES_DIR"
-    rm -rf "$work_dir"
-    echo ">>> [TAR.GZ] 完成: $(basename "$tgz_file")"
-}
-
-# ---- 4. 处理源码目录（含 Makefile 的目录直接放入 openwrt/package/） ----
-integrate_source_dir() {
-    local src_dir="$1"
-    local dir_name
-    dir_name=$(basename "$src_dir")
-    echo ">>> [SRC] 检测到源码目录: $dir_name，复制到 package/$dir_name/"
-    cp -r "$src_dir" "$OPENWRT_PKG/$dir_name"
-    echo ">>> [SRC] 完成: package/$dir_name/"
-}
-
-# ============================================
-# 主循环：遍历 package/ 下所有内容
-# ============================================
-for item in "$PKG_DIR"*; do
-    [ -e "$item" ] || continue
-
-    if [ -d "$item" ]; then
-        # 是目录 → 检查是否为源码包（含 Makefile）
-        if [ -f "$item/Makefile" ]; then
-            found=1
-            integrate_source_dir "$item"
-        fi
-    elif [ -f "$item" ]; then
-        found=1
-        case "$item" in
-            *.ipk)    integrate_ipk "$item" ;;
-            *.apk)    integrate_apk "$item" ;;
-            *.tar.gz) integrate_targz "$item" ;;
-            *.tgz)    integrate_targz "$item" ;;
-            *)
-                echo ">>> [跳过] 不支持的格式: $(basename "$item")"
+          # 主循环
+          for pkg in "$PKG_DIR"/*; do
+            [ -e "$pkg" ] || continue
+            case "$pkg" in
+              *.ipk)                integrate_ipk "$pkg" ;;
+              *.apk)                integrate_apk "$pkg" ;;
+              *.tar.gz|*.tgz)       integrate_targz "$pkg" ;;
+              *.tar.xz)             integrate_tarxz "$pkg" ;;
+              *.tar.zst)            integrate_tarzst "$pkg" ;;
+              *.zip)                integrate_zip "$pkg" ;;
+              *)
+                if [ -d "$pkg" ] && [ -f "$pkg/Makefile" ]; then
+                  echo ">>> 集成源码: $(basename "$pkg")"
+                  cp -r "$pkg" $OPENWRT_PATH/package/$(basename "$pkg")
+                else
+                  echo ">>> [跳过] $(basename "$pkg")"
+                fi
                 ;;
-        esac
-    fi
-done
+            esac
+          done
 
-if [ "$found" -eq 0 ]; then
-    echo ">>> package/ 目录下未找到任何可集成的包，跳过"
-fi
+          echo ">>> 集成完成"
+          ls -lh $OPENWRT_PATH/files/ 2>/dev/null || true
 
-# ---- 打印结果 ----
-echo ""
-echo "========== 集成结果 =========="
-echo "--- files 目录 ---"
-tree "$FILES_DIR" -L 2 2>/dev/null || find "$FILES_DIR" -maxdepth 2
-echo ""
-echo "--- package 源码包 ---"
-for d in "$OPENWRT_PKG"/*/; do
-    [ -d "$d" ] && [ -f "$d/Makefile" ] && echo "  $(basename "$d")/"
-done
-echo "=============================="
 
 
 
