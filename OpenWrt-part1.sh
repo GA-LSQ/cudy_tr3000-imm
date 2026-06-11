@@ -90,8 +90,6 @@ curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.
 git clone --depth=1  https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 git clone --depth=1  https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
 
-git_sparse_clone openwrt-25.12  # 删除构建时添加的 feeds 源（运行时不需要）
-sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
 
 # natmapt
@@ -117,4 +115,4 @@ sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 # git_sparse_clone master https://github.com/4IceG/luci-app-sms-tool luci-app-sms-tool sms-tool
 
 # 
-#./scripts/feeds update -a
+./scripts/feeds update -a
