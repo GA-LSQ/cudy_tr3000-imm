@@ -117,4 +117,4 @@ sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 # git_sparse_clone master https://github.com/4IceG/luci-app-sms-tool luci-app-sms-tool sms-tool
 
 # 
-./scripts/feeds update -a
+#./scripts/feeds update -a
