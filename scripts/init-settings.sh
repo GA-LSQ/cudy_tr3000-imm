@@ -38,7 +38,7 @@ uci set wireless.radio1.channel='auto'
 uci set wireless.radio1.cell_density='0'
 uci set wireless.default_radio1.ssid='Cudy_5G'
 
-
+uci commit wireless
 
 # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
