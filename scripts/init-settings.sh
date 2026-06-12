@@ -26,6 +26,20 @@ uci commit dhcp
 uci commit firewall
 
 
+
+#设置WiFi命令
+uci set wireless.radio0.cell_density='0'
+uci set wireless.default_radio0.ssid='Cudy_2.4G'
+uci set wireless.radio0.htmode='HE40'
+uci set wireless.radio0.channel='auto'
+uci set wireless.radio0.noscan='1'
+uci set wireless.radio1.htmode='HE160'
+uci set wireless.radio1.channel='auto'
+uci set wireless.radio1.cell_density='0'
+uci set wireless.default_radio1.ssid='Cudy_5G'
+
+
+
 # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
