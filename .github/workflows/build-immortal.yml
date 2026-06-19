@@ -316,10 +316,11 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
-          allowUpdates: true
-          tag: ${{ env.FIRMWARE_TAG }}
+          allowUpdates: false
+          tag: ${{ env.FIRMWARE_TAG }}_${{ env.FILE_DATE }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ${{ env.FIRMWARE_PATH }}/*
+          prerelease: ${{ env.PRERELEASE }}
           body: |
             **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
             ### 📒 固件信息
