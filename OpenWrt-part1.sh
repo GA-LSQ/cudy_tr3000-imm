@@ -29,7 +29,7 @@ git remote add origin https://github.com/vernesong/OpenClash.git
 git config core.sparsecheckout true
 echo "luci-app-openclash" >> .git/info/sparse-checkout
 git pull --depth 1 origin master
-cd ../../../
+cd ../../
 
 
 # 自定义函数
