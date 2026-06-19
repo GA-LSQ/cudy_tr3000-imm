@@ -20,8 +20,11 @@
 # sudo update-alternatives --config gcc
 # gcc --version
 
+# 全局提前配置，消除Git默认分支警告（放在脚本最顶部执行一次即可）
+git config --global init.defaultBranch main
+git config --global advice.defaultBranchName false
 
-# openclash
+# OpenClash 稀疏拉取
 mkdir -p package/luci-app-openclash
 cd package/luci-app-openclash
 git init
