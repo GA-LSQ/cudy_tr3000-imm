@@ -12,7 +12,7 @@ on:
         description: '指定版本进行编译'
         required: true
         type: choice
-        default: 'v24.10.6'
+        default: 'master'
         options:
           - master
           - v24.10.6
