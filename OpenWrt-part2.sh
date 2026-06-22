@@ -63,9 +63,9 @@ cat package/base-files/files/bin/config_generate |grep 192
 
 
 
-#!/bin/bash
+
 # ==================================================
-# OpenWrt 第三方源配置（diy-part2.sh 专用）
+# OpenWrt 第三方源集成配置（diy-part2.sh 专用）
 # 自动识别 opkg / apk，生成对应配置到 files/ 目录
 # ==================================================
 
