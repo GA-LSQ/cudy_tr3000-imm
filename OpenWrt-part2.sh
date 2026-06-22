@@ -60,40 +60,95 @@ export FORCE_UNSAFE_CONFIGURE=1
 echo -e "view log check br-lan ip"
 cat package/base-files/files/bin/config_generate |grep 192
 
-# ========== 预置 dllkids 第三方 opkg 源 ==========
-ARCH="aarch64_cortex-a53"            # 请根据你的设备架构修改
-SDK_VERSION="24.10"                  # 24.10 (opkg) 或 25.12 (apk)
-FEED_BASE_URL="https://down.dllkids.xyz/openwrt-feed"
-FEED_URL="${FEED_BASE_URL}/${SDK_VERSION}/${ARCH}"
-KEY_URL="${FEED_BASE_URL}/keys/dllkids-feed.pub"
 
-mkdir -p files/etc/opkg
-mkdir -p files/etc/opkg/keys
 
-CONF_FILE="files/etc/opkg/customfeeds.conf"
 
-# 避免重复添加
-if grep -q "dllkids_feed" "$CONF_FILE" 2>/dev/null; then
-    echo "dllkids feed already present, skipping..."
+#!/bin/bash
+# ==================================================
+# OpenWrt 第三方源配置（diy-part2.sh 专用）
+# 自动识别 opkg / apk，生成对应配置到 files/ 目录
+# ==================================================
+
+# ---------- opkg 源列表 ----------
+OPKG_CONF="files/etc/opkg/customfeeds.conf"
+OPKG_KEYS="files/etc/opkg/keys"
+# 格式: "名称|源配置行|公钥URL"（无公钥第三段留空）
+FEEDS_OPKG=(
+    "dllkids|src/gz dllkids https://down.dllkids.xyz/openwrt-feed/24.10/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub"
+    "openwrt_extras|src/gz openwrt_extras https://opkg.cooluc.com/openwrt-24.10/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pub"
+    "kiddin9|src/gz kiddin https://dl.openwrt.ai/packages-25.12/aarch64_cortex-a53/kiddin9|"
+)
+
+# ---------- apk 源列表 ----------
+APK_CONF="files/etc/apk/repositories.d/custom-feeds.list"
+APK_KEYS="files/etc/apk/keys"
+# 格式: "名称|纯URL|公钥URL"（apk 无需 src/gz 前缀）
+FEEDS_APK=(
+    "dllkids|https://down.dllkids.xyz/openwrt-feed/25.12/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub"
+)
+
+# ==================================================
+# 核心逻辑
+# ==================================================
+
+process_feeds() {
+    local label="$1" conf_file="$2" key_path="$3"
+    shift 3
+
+    echo -e "\n===== ${label} ====="
+    mkdir -p "$(dirname "$conf_file")" "$key_path"
+
+    local item name src_line key_url key_save
+    for item in "$@"; do
+        name=$(echo "$item" | cut -d'|' -f1)
+        src_line=$(echo "$item" | cut -d'|' -f2)
+        key_url=$(echo "$item" | cut -d'|' -f3)
+
+        echo -e "\n  [${name}]"
+
+        # 写入源配置（去重）
+        if [ -f "$conf_file" ] && grep -Fq "$src_line" "$conf_file"; then
+            echo "    ✓ 源已存在，跳过"
+        else
+            echo "$src_line" >> "$conf_file"
+            echo "    ✓ 源已写入"
+        fi
+
+        # 处理公钥
+        [ -z "$key_url" ] && { echo "    ○ 无公钥，跳过"; continue; }
+
+        key_save="${key_path}/${name}.pub"
+        [ -f "$key_save" ] && { echo "    ✓ 公钥已存在，跳过"; continue; }
+
+        printf "    ↓ 下载公钥... "
+        if wget -q -O "$key_save" "$key_url"; then
+            echo "成功 → ${key_save}"
+        else
+            echo "失败" >&2
+            rm -f "$key_save"
+        fi
+    done
+
+    echo -e "\n===== ${label} 完成 =====\n"
+}
+
+# ==================================================
+# 根据源码自动选择包管理器
+# ==================================================
+
+if [ -d package/system/apk ]; then
+    echo "检测到 apk，使用 apk 源配置"
+    process_feeds "OpenWrt APK" "$APK_CONF" "$APK_KEYS" "${FEEDS_APK[@]}"
+elif [ -d package/system/opkg ]; then
+    echo "检测到 opkg，使用 opkg 源配置"
+    process_feeds "OpenWrt OPKG" "$OPKG_CONF" "$OPKG_KEYS" "${FEEDS_OPKG[@]}"
 else
-    echo "src/gz dllkids_feed ${FEED_URL}" >> "$CONF_FILE"
-    echo "Added dllkids feed to $CONF_FILE"
+    echo "错误：未检测到 package/system/opkg 或 package/system/apk"
+    echo "继续执行编译"
 fi
 
-# 下载公钥
-echo "Downloading public key from ${KEY_URL}..."
-if wget -q -O "files/etc/opkg/keys/dllkids-feed.pub" "$KEY_URL"; then
-    echo "Public key downloaded successfully."
-else
-    echo "ERROR: Failed to download public key" >&2
-    exit 1
-fi
 
-echo "dllkids feed (opkg) integration completed."
-# =================================================
-
-
-  #集成预编译ipk（支持tar.gz格式）
+  #集成预编译ipk
    IPK_FILE="$GITHUB_WORKSPACE/package/luci-app-button-automation_all.ipk"
    if [ -f "$IPK_FILE" ]; then
        echo ">>> 发现ipk，正在解包集成..."
