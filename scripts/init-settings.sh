@@ -43,6 +43,8 @@ uci commit wireless
 # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
+uci set system.@system[0].hostname="Cudy"
+uci commit system
 
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
