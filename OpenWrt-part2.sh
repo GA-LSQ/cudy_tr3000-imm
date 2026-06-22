@@ -93,7 +93,7 @@ echo "dllkids feed (opkg) integration completed."
 
 
   #集成预编译ipk（支持tar.gz格式）
-   IPK_FILE="$GITHUB_WORKSPACE/package/luci-app-button-automation_0_all.ipk"
+   IPK_FILE="$GITHUB_WORKSPACE/package/luci-app-button-automation_all.ipk"
    if [ -f "$IPK_FILE" ]; then
        echo ">>> 发现ipk，正在解包集成..."
        mkdir -p /tmp/ipk_extract
