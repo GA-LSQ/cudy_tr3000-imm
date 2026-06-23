@@ -62,11 +62,9 @@ cat package/base-files/files/bin/config_generate |grep 192
 
 
 
-
-
 # ==================================================
-# OpenWrt 第三方源集成配置（diy-part2.sh 专用）
-# 自动识别 opkg / apk，生成对应配置到 files/ 目录
+# OpenWrt 第三方源配置（diy-part2.sh 专用）
+# 根据 REPO_BRANCH 环境变量选择 opkg / apk
 # ==================================================
 
 # ---------- opkg 源列表 ----------
@@ -84,7 +82,8 @@ APK_CONF="files/etc/apk/repositories.d/custom-feeds.list"
 APK_KEYS="files/etc/apk/keys"
 # 格式: "名称|纯URL|公钥URL"（apk 无需 src/gz 前缀）
 FEEDS_APK=(
-    "dllkids|https://down.dllkids.xyz/openwrt-feed/25.12/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub"
+    "dllkids|https://down.dllkids.xyz/openwrt-feed/25.12/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub.pem"
+    "openwrt_extras|src/gz openwrt_extras https://opkg.cooluc.com/openwrt-25.12/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pem"
 )
 
 # ==================================================
@@ -94,77 +93,137 @@ FEEDS_APK=(
 process_feeds() {
     local label="$1" conf_file="$2" key_path="$3"
     shift 3
+    local feeds=("$@")
 
-    echo -e "\n===== ${label} ====="
+    local total=${#feeds[@]}
+    local written=0 downloaded=0 skipped_src=0 skipped_key=0
+
+    local conf_label="配置行"
+    local src_label="源"
+    [ "$label" = "APK" ] && conf_label="仓库地址"
+
+    echo ""
+    echo "===== OpenWrt ${label} ====="
+    echo "配置文件: ${conf_file}"
+    echo "公钥目录: ${key_path}"
     mkdir -p "$(dirname "$conf_file")" "$key_path"
 
-    local item name src_line key_url key_save
-    for item in "$@"; do
+    local i=0 item name src_line key_url key_save key_size
+    for item in "${feeds[@]}"; do
+        i=$((i + 1))
         name=$(echo "$item" | cut -d'|' -f1)
         src_line=$(echo "$item" | cut -d'|' -f2)
         key_url=$(echo "$item" | cut -d'|' -f3)
 
-        echo -e "\n  [${name}]"
+        echo ""
+        echo "  [${i}/${total}] ${src_label}: ${name}"
+        echo "  ├─ ${conf_label}: ${src_line}"
+        if [ -n "$key_url" ]; then
+            echo "  ├─ 公钥URL: ${key_url}"
+        else
+            echo "  ├─ 公钥URL: (无)"
+        fi
 
         # 写入源配置（去重）
         if [ -f "$conf_file" ] && grep -Fq "$src_line" "$conf_file"; then
-            echo "    ✓ 源已存在，跳过"
+            echo "  ├─ ✓ ${conf_label}已存在，跳过写入"
+            skipped_src=$((skipped_src + 1))
         else
             echo "$src_line" >> "$conf_file"
-            echo "    ✓ 源已写入"
+            echo "  ├─ ✓ ${conf_label}已写入 → ${conf_file}"
+            written=$((written + 1))
         fi
 
         # 处理公钥
-        [ -z "$key_url" ] && { echo "    ○ 无公钥，跳过"; continue; }
+        if [ -z "$key_url" ]; then
+            echo "  └─ ○ 无公钥地址，跳过下载"
+            skipped_key=$((skipped_key + 1))
+            continue
+        fi
 
         key_save="${key_path}/${name}.pub"
-        [ -f "$key_save" ] && { echo "    ✓ 公钥已存在，跳过"; continue; }
+        if [ -f "$key_save" ]; then
+            echo "  └─ ✓ 公钥文件已存在，跳过下载 → ${key_save}"
+            continue
+        fi
 
-        printf "    ↓ 下载公钥... "
+        echo "  ├─ ↓ 正在下载公钥..."
         if wget -q -O "$key_save" "$key_url"; then
-            echo "成功 → ${key_save}"
+            key_size=$(du -h "$key_save" | cut -f1)
+            echo "  └─ ✓ 公钥保存成功 → ${key_save} (${key_size})"
+            downloaded=$((downloaded + 1))
         else
-            echo "失败" >&2
+            echo "  └─ ✗ 公钥下载失败: ${key_url}" >&2
             rm -f "$key_save"
         fi
     done
 
-    echo -e "\n===== ${label} 完成 =====\n"
+    # 结果汇总
+    echo ""
+    echo "----- 结果汇总 -----"
+    echo "配置文件内容:"
+    if [ -f "$conf_file" ]; then
+        local line_num=0
+        while IFS= read -r line; do
+            line_num=$((line_num + 1))
+            echo "  ${line_num}. ${line}"
+        done < "$conf_file"
+    else
+        echo "  (空)"
+    fi
+
+    echo ""
+    echo "公钥文件:"
+    local key_count=0
+    for key_save in "${key_path}"/*.pub; do
+        [ -f "$key_save" ] || continue
+        key_count=$((key_count + 1))
+        key_size=$(du -h "$key_save" | cut -f1)
+        echo "  ${key_count}. ${key_save} (${key_size})"
+    done
+    [ "$key_count" -eq 0 ] && echo "  (无)"
+
+    echo ""
+    if [ "$written" -eq 0 ] && [ "$downloaded" -eq 0 ]; then
+        echo "✓ 共处理 ${total} 个源，全部已存在，无需更新"
+    else
+        echo "✓ 共处理 ${total} 个源，新写入 ${written} 条配置，下载 ${downloaded} 个公钥"
+    fi
+
+    echo ""
+    echo "===== OpenWrt ${label} 完成 ====="
 }
 
 # ==================================================
-# 根据源码自动选择包管理器
+# 根据源码分支选择包管理器
 # ==================================================
 
-if [ -d package/system/apk ]; then
-    echo "检测到 apk，使用 apk 源配置"
-    process_feeds "OpenWrt APK" "$APK_CONF" "$APK_KEYS" "${FEEDS_APK[@]}"
-elif [ -d package/system/opkg ]; then
-    echo "检测到 opkg，使用 opkg 源配置"
-    process_feeds "OpenWrt OPKG" "$OPKG_CONF" "$OPKG_KEYS" "${FEEDS_OPKG[@]}"
+echo "========================================"
+echo " OpenWrt 第三方源配置工具"
+echo "========================================"
+echo ""
+echo "当前源码分支: ${REPO_BRANCH}"
+
+if echo "${REPO_BRANCH}" | grep -q '24'; then
+    echo "检测到 24.x 分支，使用 OPKG 源配置"
+    process_feeds \
+        "OPKG" \
+        "$OPKG_CONF" \
+        "$OPKG_KEYS" \
+        "${FEEDS_OPKG[@]}"
 else
-    echo "错误：未检测到 package/system/opkg 或 package/system/apk"
-    echo "继续执行编译"
+    echo "检测到 25.x / Master 分支，使用 APK 源配置"
+    process_feeds \
+        "APK" \
+        "$APK_CONF" \
+        "$APK_KEYS" \
+        "${FEEDS_APK[@]}"
 fi
 
-
-  #集成预编译ipk
-   IPK_FILE="$GITHUB_WORKSPACE/package/luci-app-button-automation_all.ipk"
-   if [ -f "$IPK_FILE" ]; then
-       echo ">>> 发现ipk，正在解包集成..."
-       mkdir -p /tmp/ipk_extract
-       cd /tmp/ipk_extract
-       tar -xzf "$IPK_FILE"                     # 解出 control.tar.gz 和 data.tar.gz
-       # 确保目标目录存在
-       mkdir -p "$GITHUB_WORKSPACE/openwrt/files"
-       tar -xzf data.tar.gz -C "$GITHUB_WORKSPACE/openwrt/files"
-       cd /
-       rm -rf /tmp/ipk_extract
-       echo ">>> 集成完成，插件已放入 openwrt/files/"
-   else
-       echo ">>> 未找到ipk文件，跳过"
-   fi
-
+echo ""
+echo "========================================"
+echo " 全部完成，files/ 目录可直接用于编译或部署到设备"
+echo "========================================"
 
 
 # Temperature
