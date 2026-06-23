@@ -15,6 +15,7 @@ on:
         default: 'master'
         options:
           - master
+          - v24.10.7
           - v24.10.6
           - v24.10.5
           - v24.10.4
