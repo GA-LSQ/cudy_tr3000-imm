@@ -75,6 +75,7 @@ FEEDS_OPKG=(
     "dllkids|src/gz dllkids https://down.dllkids.xyz/openwrt-feed/24.10/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub"
     "openwrt_extras|src/gz openwrt_extras https://opkg.cooluc.com/openwrt-24.10/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pub"
     "kiddin9|src/gz kiddin https://dl.openwrt.ai/packages-25.12/aarch64_cortex-a53/kiddin9|"
+    "mossdef|src/gz stangri_repo https://cdn.jsdelivr.net/gh/mossdef-org/ipk.mossdef.org|"
 )
 
 # ---------- apk 源列表 ----------
@@ -83,7 +84,8 @@ APK_KEYS="files/etc/apk/keys"
 # 格式: "名称|纯URL|公钥URL"（apk 无需 src/gz 前缀）
 FEEDS_APK=(
     "dllkids|https://down.dllkids.xyz/openwrt-feed/25.12/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub.pem"
-    "openwrt_extras|src/gz openwrt_extras https://opkg.cooluc.com/openwrt-25.12/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pem"
+    "cooluc|https://opkg.cooluc.com/openwrt-25.12/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pem"
+    "mossdef|https://cdn.jsdelivr.net/gh/mossdef-org/apk.mossdef.org/packages.adb|https://apk.mossdef.org/apk.mossdef.org.pem"
 )
 
 # ==================================================
