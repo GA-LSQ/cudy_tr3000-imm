@@ -16,7 +16,7 @@ git clone https://github.com/timsaya/luci-app-bandix package/luci-app-bandix
 git clone https://github.com/timsaya/openwrt-bandix package/openwrt-bandix
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
-#git clone https://github.com/GA-LSQ/button.git package/luci-app-button
+git clone https://github.com/GA-LSQ/button.git package/luci-app-button
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
