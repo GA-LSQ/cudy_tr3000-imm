@@ -17,6 +17,9 @@ git clone https://github.com/timsaya/openwrt-bandix package/openwrt-bandix
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 git clone https://github.com/GA-LSQ/button.git package/luci-app-button
+git clone https://github.com/liudf0716/apfree-wifidog.git package/apfree-wifidog
+git clone https://github.com/ZASENJC/luci-theme-MD3.git package/luci-theme-MD3
+git clone https://github.com/MIAOBUSI/luci-theme-vitrawrt.git package/luci-theme-vitrawrt
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
@@ -75,7 +78,6 @@ FEEDS_OPKG=(
     "dllkids|src/gz dllkids https://down.dllkids.xyz/openwrt-feed/24.10/aarch64_cortex-a53|https://down.dllkids.xyz/openwrt-feed/keys/dllkids-feed.pub"
     "openwrt_extras|src/gz openwrt_extras https://opkg.cooluc.com/openwrt-24.10/aarch64_cortex-a53|https://opkg.cooluc.com/key-build.pub"
     "kiddin9|src/gz kiddin https://dl.openwrt.ai/packages-25.12/aarch64_cortex-a53/kiddin9|"
-    "mossdef|src/gz stangri_repo https://cdn.jsdelivr.net/gh/mossdef-org/ipk.mossdef.org|"
 )
 
 # ---------- apk 源列表 ----------
