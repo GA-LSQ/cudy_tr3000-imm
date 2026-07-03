@@ -234,17 +234,28 @@ echo "========================================"
 JS_FILE="feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js"
 PO_FILE="feeds/luci/modules/luci-base/po/zh_Hans/base.po"
 
-sed -i "s/uci.load('system')/&,/" $JS_FILE
-sed -i "/uci.load('system')/a \ \t\t\tL.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon*/temp1_input']), {})" $JS_FILE
-sed -i "/unixtime[[:space:]]*=[[:space:]]*data\[7\];/a \ \t\tvar tempData = data[9] || {};" $JS_FILE
-sed -i "/luciversion = luciversion.branch/a \ \t\tvar stdout = (tempData \&\& tempData.stdout) ? tempData.stdout.trim() : ''; var lines = stdout.split(/\\\\s+/); var cT = lines[1] ? (parseInt(lines[1])\/1000).toFixed(1) : (lines[0] ? (parseInt(lines[0])\/1000).toFixed(1) : 'N/A'); var w1 = lines[2] ? (parseInt(lines[2])\/1000).toFixed(1) : 'N/A'; var w2 = lines[3] ? (parseInt(lines[3])\/1000).toFixed(1) : 'N/A'; var tempVal = 'CPU: ' + cT + '°C WiFi: ' + w1 + '°C ' + w2 + '°C';" $JS_FILE
+# 先清理历史重复注入代码，防止多次编译错乱
+sed -i '/var tempData = data\[9\]/d' "$JS_FILE"
+sed -i '/var stdout = (tempData \&\& tempData.stdout)/d' "$JS_FILE"
+sed -i '/_('"'"'Temperature'"'"'),      tempVal,/d' "$JS_FILE"
+# 恢复原生温度代码注释，避免多层注释
+sed -i 's/^\/\/\(.*tempinfo.tempinfo\)/\1/' "$JS_FILE"
+
+sed -i "s/uci.load('system')/&,/" "$JS_FILE"
+sed -i "/uci.load('system')/a \ \t\t\tL.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon*/temp1_input']), {})" "$JS_FILE"
+
+# 1. 关键：先声明 tempData，所有使用它的代码必须放在这行之后
+sed -i "/unixtime[[:space:]]*=[[:space:]]*data\[7\];/a \ \t\tvar tempData = Array.isArray(data) && data.length >= 10 ? data[9] : {};" $JS_FILE
+
+# 2. 把温度解析代码 插入在 tempData 声明的下一行，保证顺序正确
+sed -i "/var tempData = Array.isArray(data)/a \ \t\tvar stdout = (tempData \&\& tempData.stdout) ? tempData.stdout.trim() : ''; var lines = stdout.split(/\\\\s+/); var cT = lines[1] ? (parseInt(lines[1])\/1000).toFixed(1) : (lines[0] ? (parseInt(lines[0])\/1000).toFixed(1) : 'N/A'); var w1 = lines[2] ? (parseInt(lines[2])\/1000).toFixed(1) : 'N/A'; var w2 = lines[3] ? (parseInt(lines[3])\/1000).toFixed(1) : 'N/A'; var tempVal = 'CPU: ' + cT + '°C WiFi: ' + w1 + '°C ' + w2 + '°C';" $JS_FILE
 
 sed -i "/_('Architecture'),/a \ \t\t\t_('Temperature'),      tempVal," $JS_FILE
 
 sed -i '/if (tempinfo.tempinfo) {/,/}/ s/^/\/\//' $JS_FILE
 
 if [ -f "$PO_FILE" ]; then
-    if ! grep -q "Temperature" "$PO_FILE"; then
+    if ! grep -q "msgid \"Temperature\"" "$PO_FILE"; then
         echo -e '\nmsgid "Temperature"\nmsgstr "温度"' >> "$PO_FILE"
     fi
 fi
