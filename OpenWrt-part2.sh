@@ -81,7 +81,7 @@ FEEDS_OPKG=(
 )
 
 # ---------- apk 源列表 ----------
-APK_CONF="files/etc/apk/repositories.d/custom-feeds.list"
+APK_CONF="files/etc/apk/repositories.d/customfeeds.list"
 APK_KEYS="files/etc/apk/keys"
 # 格式: "名称|纯URL|公钥URL"（apk 无需 src/gz 前缀）
 FEEDS_APK=(
