@@ -52,6 +52,10 @@ uci set bandix.dns.enabled='1'
 
 uci commit bandix
 
+#启用upnp
+uci set upnpd.config.enabled='1'
+uci commit upnpd
+
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
 
