@@ -25,8 +25,6 @@ uci commit network
 uci commit dhcp
 uci commit firewall
 
-
-
 #设置WiFi命令
 uci set wireless.radio0.cell_density='0'
 uci set wireless.default_radio0.ssid='Cudy_2.4G'
@@ -43,8 +41,16 @@ uci commit wireless
 # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
+#设置主机名
 uci set system.@system[0].hostname="Cudy"
 uci commit system
+
+#启用bandix
+uci set bandix.traffic.enabled='1'
+uci set bandix.connections.enabled='1'
+uci set bandix.dns.enabled='1'
+
+uci commit bandix
 
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
