@@ -1,4 +1,4 @@
-name: CUDY_TR3000_V1_112M_IM_24.10
+name: CUDY_TR3000_V1_112M_IM
 
 on:
   workflow_dispatch:
