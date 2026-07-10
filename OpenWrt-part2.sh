@@ -231,3 +231,12 @@ echo "========================================"
 
 
 
+# 自定义署名+构建时间
+AUTHOR="by Luger"
+BUILD_TIME=$(TZ=UTC-8 date "+%Y%m%d%H%M")
+NEW_REV="${AUTHOR} Build:${BUILD_TIME}"
+
+VERSION_SRC="package/base-files/files/etc/openwrt_version"
+if [ -f "${VERSION_SRC}" ]; then
+    echo "${NEW_REV}" > "${VERSION_SRC}"
+fi
