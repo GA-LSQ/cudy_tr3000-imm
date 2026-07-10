@@ -41,6 +41,9 @@ uci commit wireless
 # 删除构建时添加的 feeds 源（运行时不需要）
 sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
+#注释包检测
+sed -i '/^option check_signature/s/^/#/' /etc/opkg.conf
+
 #设置主机名
 uci set system.@system[0].hostname="Cudy"
 uci commit system
