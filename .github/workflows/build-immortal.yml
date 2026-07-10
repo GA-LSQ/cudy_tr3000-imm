@@ -62,7 +62,7 @@ env:
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: ${{ github.event.inputs.release || 'true' }}
   PRERELEASE: ${{ github.event.inputs.prerelease || 'false' }}
-  FIRMWARE_TAG: CUDY_TR3000_V1_112M_IM_24.10
+  FIRMWARE_TAG: CUDY_TR3000_V1_112M_IM
   TZ: Asia/Shanghai
 
 jobs:
