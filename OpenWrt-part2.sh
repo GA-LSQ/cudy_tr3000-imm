@@ -232,11 +232,19 @@ echo "========================================"
 
 
 # 自定义署名+构建时间
-AUTHOR="by Luger"
-BUILD_TIME=$(TZ=UTC-8 date "+%Y%m%d%H%M")
-NEW_REV="${AUTHOR} Build:${BUILD_TIME}"
+#AUTHOR="by Luger"
+#BUILD_TIME=$(TZ=UTC-8 date "+%Y%m%d%H%M")
+#NEW_REV="${AUTHOR} Build:${BUILD_TIME}"
 
-VERSION_SRC="package/base-files/files/etc/openwrt_version"
-if [ -f "${VERSION_SRC}" ]; then
-    echo "${NEW_REV}" > "${VERSION_SRC}"
-fi
+#VERSION_SRC="package/base-files/files/etc/openwrt_version"
+#if [ -f "${VERSION_SRC}" ]; then
+#    echo "${NEW_REV}" > "${VERSION_SRC}"
+#fi
+
+
+A_author="Luger"
+B_author="Luger (=￣ω￣=)喵了个咪"
+# 1. 删除原生哈希，追加构建日期
+sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H%M")/" package/base-files/files/etc/openwrt_release
+# 2. 替换修订号占位符为自定义署名
+sed -i "s/%R/by $B_author/" package/base-files/files/etc/openwrt_release
