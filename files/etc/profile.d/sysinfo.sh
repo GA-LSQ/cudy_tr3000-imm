@@ -1,5 +1,5 @@
-#!/bin/bash
-# 从Kiddin拷贝的脚本
+#!/bin/sh
+# 适配OpenWrt ash 修复版MOTD系统信息脚本
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export LANG=zh_CN.UTF-8
 
@@ -12,132 +12,126 @@ DATA_STORAGE=/userdisk/data
 MEDIA_STORAGE=/userdisk/snail
 
 
-[[ -f /etc/default/motd ]] && . /etc/default/motd
+[ -f /etc/default/motd ] && . /etc/default/motd
 for f in $MOTD_DISABLE; do
-	[[ $f == $THIS_SCRIPT ]] && exit 0
+	[ "$f" = "$THIS_SCRIPT" ] && exit 0
 done
 
 
-# don't edit below here
-function display()
+display()
 {
-	# $1=name $2=value $3=red_limit $4=minimal_show_limit $5=unit $6=after $7=acs/desc{
-	# battery red color is opposite, lower number
-	if [[ "$1" == "Battery" ]]; then
-		local great="<";
+	# $1=name $2=value $3=red_limit $4=minimal_show_limit $5=unit $6=after
+	if [ "$1" = "Battery" ]; then
+		great="<"
 	else
-		local great=">";
+		great=">"
 	fi
-	if [[ -n "$2" && "$2" > "0" && (( "${2%.*}" -ge "$4" )) ]]; then
+	if [ -n "$2" ] && [ "$2" \> "0" ] && [ $(( ${2%.*} )) -ge "$4" ]; then
 		printf "%-14s%s" "$1:"
-		if awk "BEGIN{exit ! ($2 $great $3)}"; then
-			echo -ne "\e[0;91m $2";
+		if echo "$2" | awk -v cmp="$great$3" 'BEGIN{exit !($0 cmp)}'; then
+			echo -ne "\e[0;91m $2"
 		else
-			echo -ne "\e[0;92m $2";
+			echo -ne "\e[0;92m $2"
 		fi
 		printf "%-1s%s\x1B[0m" "$5"
 		printf "%-11s%s\t" "$6"
 		return 1
 	fi
-} # display
+}
 
 
-function get_ip_addresses()
+get_ip_addresses()
 {
-	local ips=()
+	ips=""
 	for f in /sys/class/net/*; do
-		local intf=$(basename $f)
-		# match only interface names starting with e (Ethernet), br (bridge), w (wireless), r (some Ralink drivers use ra<number> format)
-		if [[ $intf =~ $SHOW_IP_PATTERN ]]; then
-			local tmp=$(ip -4 addr show dev $intf | awk '/inet/ {print $2}' | cut -d'/' -f1)
-			# add both name and IP - can be informative but becomes ugly with long persistent/predictable device names
-			#[[ -n $tmp ]] && ips+=("$intf: $tmp")
-			# add IP only
-			[[ -n $tmp ]] && ips+=("$tmp")
+		intf=$(basename "$f")
+		echo "$intf" | grep -Eq "$SHOW_IP_PATTERN"
+		if [ $? -eq 0 ]; then
+			tmp=$(ip -4 addr show dev "$intf" 2>/dev/null | awk '/inet/ {print $2}' | cut -d'/' -f1)
+			[ -n "$tmp" ] && ips="$ips $tmp"
 		fi
 	done
-	echo "${ips[@]}"
-} # get_ip_addresses
+	echo "$ips"
+}
 
 
-function storage_info()
+storage_info()
 {
-	# storage info
 	RootInfo=$(df -h /)
-	root_usage=$(awk '/\// {print $(NF-1)}' <<<${RootInfo} | sed 's/%//g')
-	root_total=$(awk '/\// {print $(NF-4)}' <<<${RootInfo})
+	root_usage=$(echo "$RootInfo" | awk '/\// {print $(NF-1)}' | sed 's/%//g')
+	root_total=$(echo "$RootInfo" | awk '/\// {print $(NF-4)}')
 
-	# storage info
 	[ -d /boot ] && {
-	BootInfo=$(df -h /boot) 2>/dev/null
-	boot_usage=$(awk '/\// {print $(NF-1)}' <<<${BootInfo} | sed 's/%//g')
-	boot_total=$(awk '/\// {print $(NF-4)}' <<<${BootInfo})
+	BootInfo=$(df -h /boot 2>/dev/null)
+	boot_usage=$(echo "$BootInfo" | awk '/\// {print $(NF-1)}' | sed 's/%//g')
+	boot_total=$(echo "$BootInfo" | awk '/\// {print $(NF-4)}')
 	}
-	StorageInfo=$(df -h $MEDIA_STORAGE 2>/dev/null | grep $MEDIA_STORAGE)
-	if [[ -n "${StorageInfo}" && ${RootInfo} != *$MEDIA_STORAGE* ]]; then
-		media_usage=$(awk '/\// {print $(NF-1)}' <<<${StorageInfo} | sed 's/%//g')
-		media_total=$(awk '/\// {print $(NF-4)}' <<<${StorageInfo})
+
+	StorageInfo=$(df -h "$MEDIA_STORAGE" 2>/dev/null | grep "$MEDIA_STORAGE")
+	if [ -n "$StorageInfo" ]; then
+		echo "$RootInfo" | grep -qv "$MEDIA_STORAGE"
+		if [ $? -eq 0 ]; then
+			media_usage=$(echo "$StorageInfo" | awk '/\// {print $(NF-1)}' | sed 's/%//g')
+			media_total=$(echo "$StorageInfo" | awk '/\// {print $(NF-4)}')
+		fi
 	fi
 
-	StorageInfo=$(df -h $DATA_STORAGE 2>/dev/null | grep $DATA_STORAGE)
-	if [[ -n "${StorageInfo}" && ${RootInfo} != *$DATA_STORAGE* ]]; then
-		data_usage=$(awk '/\// {print $(NF-1)}' <<<${StorageInfo} | sed 's/%//g')
-		data_total=$(awk '/\// {print $(NF-4)}' <<<${StorageInfo})
+	StorageInfo=$(df -h "$DATA_STORAGE" 2>/dev/null | grep "$DATA_STORAGE")
+	if [ -n "$StorageInfo" ]; then
+		echo "$RootInfo" | grep -qv "$DATA_STORAGE"
+		if [ $? -eq 0 ]; then
+			data_usage=$(echo "$StorageInfo" | awk '/\// {print $(NF-1)}' | sed 's/%//g')
+			data_total=$(echo "$StorageInfo" | awk '/\// {print $(NF-4)}')
+		fi
 	fi
-} # storage_info
+}
 
 
-# query various systems and send some stuff to the background for overall faster execution.
-# Works only with ambienttemp and batteryinfo since A20 is slow enough :)
-ip_address=$(get_ip_addresses &)
+ip_address=$(get_ip_addresses)
 storage_info
 critical_load=$(( 1 + $(grep -c processor /proc/cpuinfo) / 2 ))
 
-# get uptime, logged in users and load in one take
 UptimeString=$(uptime | tr -d ',')
-time=$(awk -F" " '{print $3" "$4}' <<<"${UptimeString}")
-load="$(awk -F"average: " '{print $2}'<<<"${UptimeString}")"
-case ${time} in
-	1:*) # 1-2 hours
-		time=$(awk -F" " '{print $3" 小时"}' <<<"${UptimeString}")
+time=$(echo "$UptimeString" | awk -F" " '{print $3" "$4}')
+load=$(echo "$UptimeString" | awk -F"average: " '{print $2}')
+
+case $time in
+	1:*)
+		time=$(echo "$UptimeString" | awk -F" " '{print $3" 小时"}')
 		;;
-	*:*) # 2-24 hours
-		time=$(awk -F" " '{print $3" 小时"}' <<<"${UptimeString}")
+	*:*)
+		time=$(echo "$UptimeString" | awk -F" " '{print $3" 小时"}')
 		;;
-	*day) # days
-		days=$(awk -F" " '{print $3"天"}' <<<"${UptimeString}")
-		time=$(awk -F" " '{print $5}' <<<"${UptimeString}")
-		time="$days "$(awk -F":" '{print $1"小时 "$2"分钟"}' <<<"${time}")
+	*day)
+		days=$(echo "$UptimeString" | awk -F" " '{print $3"天"}')
+		time_part=$(echo "$UptimeString" | awk -F" " '{print $5}')
+		time="$days $(echo "$time_part" | awk -F":" '{print $1"小时 "$2"分钟"}')"
 		;;
 esac
 
 
-# memory and swap
 mem_info=$(LC_ALL=C free -w 2>/dev/null | grep "^Mem" || LC_ALL=C free | grep "^Mem")
-memory_usage=$(awk '{printf("%.0f",(($2-($4+$6))/$2) * 100)}' <<<${mem_info})
-memory_total=$(awk '{printf("%d",$2/1024)}' <<<${mem_info})
+memory_usage=$(echo "$mem_info" | awk '{printf("%.0f",(($2-($4+$6))/$2) * 100)}')
+memory_total=$(echo "$mem_info" | awk '{printf("%d",$2/1024)}')
+
 swap_info=$(LC_ALL=C free -m | grep "^Swap")
-swap_usage=$( (awk '/Swap/ { printf("%3.0f", $3/$2*100) }' <<<${swap_info} 2>/dev/null || echo 0) | tr -c -d '[:digit:]')
-swap_total=$(awk '{print $(2)}' <<<${swap_info})
+swap_usage=$( (echo "$swap_info" | awk '/Swap/ { printf("%3.0f", $3/$2*100) }' 2>/dev/null || echo 0) | tr -c -d '[:digit:]')
+swap_total=$(echo "$swap_info" | awk '{print $2}')
 
 
-# display info
-display "系统负载" "${load%% *}" "${critical_load}" "0" "" "${load#* }"
+display "系统负载" "${load%% *}" "$critical_load" "0" "" "${load#* }"
 printf "运行时间:  \x1B[92m%s\x1B[0m\t\t" "$time"
-echo "" # fixed newline
-
+echo ""
 
 display "内存已用" "$memory_usage" "70" "0" " %" " of ${memory_total}MB"
-display "交换内存" "$swap_usage" "10" "0" " %" " of $swap_total""Mb"
+display "交换内存" "$swap_usage" "10" "0" " %" " of ${swap_total}Mb"
 printf "IP  地址:  \x1B[92m%s\x1B[0m" "$ip_address"
-echo "" # fixed newline
+echo ""
 
-
-a=0;b=0;c=0
+a=0;b=0
 display "CPU 温度" "$board_temp" "45" "0" "°C" "" ; a=$?
 display "环境温度" "$amb_temp" "40" "0" "°C" "" ; b=$?
-(( ($a+$b) >0 )) && echo "" # new line only if some value is displayed
-
+[ $((a + b)) -gt 0 ] && echo ""
 
 display "启动存储" "$boot_usage" "90" "1" "%" " of $boot_total"
 display "系统存储" "$root_usage" "90" "1" "%" " of $root_total"
@@ -147,5 +141,3 @@ display "数据存储" "$data_usage" "90" "1" "%" " of $data_total"
 display "媒体存储" "$media_usage" "90" "1" "%" " of $media_total"
 echo ""
 echo ""
-
-
