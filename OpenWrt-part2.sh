@@ -230,18 +230,7 @@ echo " 全部完成，files/ 目录可直接用于编译或部署到设备"
 echo "========================================"
 
 
-
-# 自定义署名+构建时间
-#AUTHOR="by Luger"
-#BUILD_TIME=$(TZ=UTC-8 date "+%Y%m%d%H%M")
-#NEW_REV="${AUTHOR} Build:${BUILD_TIME}"
-
-#VERSION_SRC="package/base-files/files/etc/openwrt_version"
-#if [ -f "${VERSION_SRC}" ]; then
-#    echo "${NEW_REV}" > "${VERSION_SRC}"
-#fi
-
-
+# 自定义作者
 A_author="Luger"
 B_author="Luger (=￣ω￣=)喵了个咪"
 sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H%M")/" package/base-files/files/etc/openwrt_release
