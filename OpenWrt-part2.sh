@@ -17,7 +17,7 @@ git clone https://github.com/timsaya/openwrt-bandix package/openwrt-bandix
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 git clone https://github.com/GA-LSQ/button.git package/luci-app-button
-git clone https://github.com/liudf0716/apfree-wifidog.git package/apfree-wifidog
+#git clone https://github.com/liudf0716/apfree-wifidog.git package/apfree-wifidog
 git clone https://github.com/ZASENJC/luci-theme-MD3.git package/luci-theme-MD3
 git clone https://github.com/MIAOBUSI/luci-theme-vitrawrt.git package/luci-theme-vitrawrt
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
