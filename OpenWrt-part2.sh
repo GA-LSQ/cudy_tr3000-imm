@@ -17,8 +17,6 @@ git clone https://github.com/timsaya/openwrt-bandix package/openwrt-bandix
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 git clone https://github.com/GA-LSQ/button.git package/luci-app-button
-#git clone https://github.com/liudf0716/apfree-wifidog.git package/apfree-wifidog
-git clone https://github.com/ZASENJC/luci-theme-MD3.git package/luci-theme-MD3
 git clone https://github.com/MIAOBUSI/luci-theme-vitrawrt.git package/luci-theme-vitrawrt
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 git clone https://github.com/destan19/luci-app-harbor-file package/luci-app-harbor-file
@@ -26,7 +24,7 @@ git clone https://github.com/destan19/luci-app-harbor-file package/luci-app-harb
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
 #使用iStoreOS banner
-curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/istoreos/istoreos/refs/heads/istoreos-22.03/package/base-files/files/etc/banner
+#curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/istoreos/istoreos/refs/heads/istoreos-22.03/package/base-files/files/etc/banner
 
 # 修改 分区大小，默认 mod 分区大小为 112MB：0x7000000。改为 114MB：0x7200000 version < 24.10.3
 sed -i '/label = "ubi"/{n;s/reg = <0x5c0000 0x[0-9a-f]\+>/reg = <0x5c0000 0x7000000>/}' target/linux/mediatek/dts/mt7981b-cudy-tr3000-v1.dts
