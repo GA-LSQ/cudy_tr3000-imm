@@ -20,6 +20,8 @@ git clone https://github.com/GA-LSQ/button.git package/luci-app-button
 git clone https://github.com/MIAOBUSI/luci-theme-vitrawrt.git package/luci-theme-vitrawrt
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 git clone https://github.com/destan19/luci-app-harbor-file package/luci-app-harbor-file
+git clone https://github.com/chenmozhijin/turboacc.git package/luci-app-turboacc
+git clone https://github.com/bobbyunknown/luci-app-syscontrol.git package/luci-app-syscontrol
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
