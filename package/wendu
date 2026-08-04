@@ -43,7 +43,7 @@ return baseclass.extend({
 		let switchT = lines[0] ? (parseInt(lines[0]) / 1000).toFixed(1) : 'N/A';
 		let cpuT    = lines[1] ? (parseInt(lines[1]) / 1000).toFixed(1) : 'N/A';
 		let wifiT   = lines[2] ? (parseInt(lines[2]) / 1000).toFixed(1) : 'N/A';
-    let tempVal = `CPU: ${cpuT}°C  WiFi: ${wifiT}°C  SW: ${switchT}°C`;
+		let tempVal = `CPU: ${cpuT}°C  WiFi: ${wifiT}°C  SW: ${switchT}°C`;
 
 		var datestr = null;
 
