@@ -89,7 +89,7 @@ curl -sSL https://raw.githubusercontent.com/chenmozhijin/turboacc/luci/add_turbo
 # git clone --depth=1 https://github.com/lisaac/luci-app-diskman package/luci-app-diskman
 
 # 温度插件
-git clone --depth=1 https://github.com/gSpotx2f/luci-app-temp-status package/luci-app-temp-status
+# git clone --depth=1 https://github.com/gSpotx2f/luci-app-temp-status package/luci-app-temp-status
 
 # 带宽监控+在线设备，相互依赖
 # git_sparse_clone master https://github.com/haiibo/openwrt-packages luci-app-wrtbwmon wrtbwmon luci-app-onliner
