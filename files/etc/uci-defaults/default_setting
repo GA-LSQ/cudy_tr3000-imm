@@ -11,8 +11,8 @@ uci batch<<EOF
 	commit system
 EOF
 
-# --- 2. 设置软件源为中科大 ---
-sed -i 's_downloads.openwrt.org_mirrors.ustc.edu.cn/openwrt_' /etc/opkg/distfeeds.conf
+# --- 2. 设置软件源为清华大学 ---
+sed -i 's_downloads.openwrt.org_mirrors.tuna.tsinghua.edu.cn/openwrt_' /etc/opkg/distfeeds.conf
 
 # --- 3. TTYD 配置 (检查初始化脚本更准确) ---
 if [ -e /etc/init.d/ttyd ];then
@@ -22,6 +22,9 @@ if [ -e /etc/init.d/ttyd ];then
 	commit ttyd
 EOF
 fi
+
+# 删除构建时添加的 feeds 源（运行时不需要）
+sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
 if [ -e /etc/hotplug.d/button/buttons ];then
 	chmod +x /etc/hotplug.d/button/buttons
