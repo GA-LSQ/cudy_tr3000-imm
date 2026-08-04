@@ -4,6 +4,9 @@
 uci set luci.main.mediaurlbase='/luci-static/argon'
 uci commit luci
 
+# 删除构建时添加的 feeds 源（运行时不需要）
+sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
+
 # USB 网络接口
 uci set network.USB=interface
 uci set network.USB.proto='dhcp'
@@ -26,20 +29,28 @@ uci commit dhcp
 uci commit firewall
 
 #设置WiFi命令
+uci set wireless.radio0.disabled=0
 uci set wireless.radio0.cell_density='0'
 uci set wireless.default_radio0.ssid='Cudy_2.4G'
+#uci set wireless.default_radio0.encryption='psk2'
+#uci set wireless.default_radio0.key='12345678'
+uci set wireless.radio0.country='AU'
 uci set wireless.radio0.htmode='HE40'
 uci set wireless.radio0.channel='auto'
 uci set wireless.radio0.noscan='1'
+
+uci set wireless.radio1.disabled=0
+uci set wireless.default_radio1.ssid='Cudy_5G'
+#uci set wireless.default_radio1.encryption='psk2'
+#uci set wireless.default_radio1.key='12345678'
 uci set wireless.radio1.htmode='HE160'
 uci set wireless.radio1.channel='auto'
 uci set wireless.radio1.cell_density='0'
-uci set wireless.default_radio1.ssid='Cudy_5G'
+uci set wireless.radio1.country='AU'
+
 
 uci commit wireless
 
-# 删除构建时添加的 feeds 源（运行时不需要）
-sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
 #注释包检测
 sed -i '/^option check_signature/s/^/#/' /etc/opkg.conf
