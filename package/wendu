@@ -1,0 +1,91 @@
+'use strict';
+'require baseclass';
+'require fs';
+'require rpc';
+
+var callLuciVersion = rpc.declare({
+	object: 'luci',
+	method: 'getVersion'
+});
+
+var callSystemBoard = rpc.declare({
+	object: 'system',
+	method: 'board'
+});
+
+var callSystemInfo = rpc.declare({
+	object: 'system',
+	method: 'info'
+});
+
+return baseclass.extend({
+	title: _('System'),
+
+	load: function() {
+		return Promise.all([
+			L.resolveDefault(callSystemBoard(), {}),
+			L.resolveDefault(callSystemInfo(), {}),
+			L.resolveDefault(callLuciVersion(), { revision: _('unknown version'), branch: 'LuCI' }),
+			L.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon0/temp1_input /sys/class/hwmon/hwmon1/temp1_input /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null']), { stdout: '' })
+		]);
+	},
+
+	render: function(data) {
+		var boardinfo   = data[0],
+		    systeminfo  = data[1],
+		    luciversion = data[2],
+		    tempResult  = data[3];
+
+		luciversion = luciversion.branch + ' ' + luciversion.revision;
+
+		let stdout = tempResult.stdout || '';
+		let lines = stdout.trim().split(/[\n\s]+/);
+		let switchT = lines[0] ? (parseInt(lines[0]) / 1000).toFixed(1) : 'N/A';
+		let cpuT    = lines[1] ? (parseInt(lines[1]) / 1000).toFixed(1) : 'N/A';
+		let wifiT   = lines[2] ? (parseInt(lines[2]) / 1000).toFixed(1) : 'N/A';
+    let tempVal = `CPU: ${cpuT}°C  WiFi: ${wifiT}°C  SW: ${switchT}°C`;
+
+		var datestr = null;
+
+		if (systeminfo.localtime) {
+			var date = new Date(systeminfo.localtime * 1000);
+
+			datestr = '%04d-%02d-%02d %02d:%02d:%02d'.format(
+				date.getUTCFullYear(),
+				date.getUTCMonth() + 1,
+				date.getUTCDate(),
+				date.getUTCHours(),
+				date.getUTCMinutes(),
+				date.getUTCSeconds()
+			);
+		}
+
+		var fields = [
+			_('Hostname'),         boardinfo.hostname,
+			_('Model'),            boardinfo.model,
+			_('Architecture'),     boardinfo.system,
+			_('Temperature'),      tempVal,
+			_('Target Platform'),  (L.isObject(boardinfo.release) ? boardinfo.release.target : ''),
+			_('Firmware Version'), (L.isObject(boardinfo.release) ? boardinfo.release.description + ' / ' : '') + (luciversion || ''),
+			_('Kernel Version'),   boardinfo.kernel,
+			_('Local Time'),       datestr,
+			_('Uptime'),           systeminfo.uptime ? '%t'.format(systeminfo.uptime) : null,
+			_('Load Average'),     Array.isArray(systeminfo.load) ? '%.2f, %.2f, %.2f'.format(
+				systeminfo.load[0] / 65535.0,
+				systeminfo.load[1] / 65535.0,
+				systeminfo.load[2] / 65535.0
+			) : null
+		];
+
+		var table = E('table', { 'class': 'table' });
+
+		for (var i = 0; i < fields.length; i += 2) {
+			table.appendChild(E('tr', { 'class': 'tr' }, [
+				E('td', { 'class': 'td left', 'width': '33%' }, [ fields[i] ]),
+				E('td', { 'class': 'td left' }, [ (fields[i + 1] != null) ? fields[i + 1] : '?' ])
+			]));
+		}
+
+		return table;
+	}
+});
