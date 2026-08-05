@@ -5,7 +5,7 @@ uci set luci.main.mediaurlbase='/luci-static/argon'
 uci commit luci
 
 # 删除构建时添加的 feeds 源（运行时不需要）
-sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
+#sed -i '/nas\|nas_luci\|istore/d' /etc/opkg/distfeeds.conf
 
 # USB 网络接口
 uci set network.USB=interface
@@ -69,6 +69,17 @@ uci commit bandix
 #启用upnp
 uci set upnpd.config.enabled='1'
 uci commit upnpd
+
+#添加候选ntp服务器
+uci del system.ntp.server
+uci add_list system.ntp.server='ntp.ntsc.ac.cn'
+uci add_list system.ntp.server='ntp.aliyun.com'
+uci commit system
+
+#勾选turboacc MTK无线硬件加速，全锥ipv6
+uci set turboacc.config.hw_wed='1'
+uci set turboacc.config.fullcone6='1'
+uci commit turboacc
 
 # Disable IPV6 ula prefix
 # sed -i 's/^[^#].*option ula/#&/' /etc/config/network
