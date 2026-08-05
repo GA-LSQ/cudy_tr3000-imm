@@ -248,10 +248,9 @@ JS_FILE="feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/st
 PO_FILE="feeds/luci/modules/luci-base/po/zh_Hans/base.po"
 
 sed -i "s/uci\.load('system')/&,/" "$JS_FILE"
-sed -i "/uci\.load('system')/a \t\t\tL.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon0/temp1_input /sys/class/hwmon/hwmon1/temp1_input /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null']), { stdout: '' })" "$JS_FILE"
-sed -i "/unixtime[[:space:]]*=[[:space:]]*data\[3\]/a \t\tvar tempData = data[4] || {};" "$JS_FILE"
-sed -i "/luciversion = luciversion.branch/a \t\tvar stdout = (tempData.stdout || '').trim(); var lines = stdout.split(/\\s+/); var switchT = lines[0] ? (parseInt(lines[0])/1000).toFixed(1) : 'N/A'; var cpuT = lines[1] ? (parseInt(lines[1])/1000).toFixed(1) : 'N/A'; var wifiT = lines[2] ? (parseInt(lines[2])/1000).toFixed(1) : 'N/A'; var tempVal = 'CPU: ' + cpuT + '°C  WiFi: ' + wifiT + '°C  SW: ' + switchT + '°C';" "$JS_FILE"
-sed -i "/_('Architecture'),/a \t\t\t_('Temperature'),      tempVal," "$JS_FILE"
+sed -i "/uci\.load('system'),/a \\\t\t\tL.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon0/temp1_input /sys/class/hwmon/hwmon1/temp1_input /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null']), { stdout: '' })" "$JS_FILE"
+sed -i "/luciversion = luciversion.branch/a \\\t\tvar tempData = data[5] || {};\\\n\\\t\tvar stdout = (tempData.stdout || '').trim();\\\n\\\t\tvar lines = stdout.split(/\\s+/);\\\n\\\t\tvar switchT = lines[0] ? (parseInt(lines[0])/1000).toFixed(1) : 'N/A';\\\n\\\t\tvar cpuT = lines[1] ? (parseInt(lines[1])/1000).toFixed(1) : 'N/A';\\\n\\\t\tvar wifiT = lines[2] ? (parseInt(lines[2])/1000).toFixed(1) : 'N/A';\\\n\\\t\tvar tempVal = 'CPU: ' + cpuT + '°C  WiFi: ' + wifiT + '°C  SW: ' + switchT + '°C';" "$JS_FILE"
+sed -i "/_('Architecture'),/a \\\t\t\t_('Temperature'),      tempVal," "$JS_FILE"
 
 if [ -f "$PO_FILE" ]; then
     if ! grep -q "msgid \"Temperature\"" "$PO_FILE"; then
