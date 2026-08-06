@@ -247,12 +247,33 @@ sed -i "s/%R/by $B_author/" package/base-files/files/usr/lib/os-release
 JS_FILE="feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js"
 PO_FILE="feeds/luci/modules/luci-base/po/zh_Hans/base.po"
 
-sed -i "s/uci\.load('system')/&,/" "$JS_FILE"
-TEMP_EXEC="L.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon0/temp1_input /sys/class/hwmon/hwmon1/temp1_input /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null']), { stdout: '' })"
-sed -i "/uci\.load('system'),/a\\			${TEMP_EXEC}" "$JS_FILE"
-TEMP_PARSE="var tempData = data[5] || {}; var stdout = (tempData.stdout || '').trim(); var lines = stdout.split('\\n'); var switchT = lines[0] ? (parseInt(lines[0])/1000).toFixed(1) : 'N/A'; var cpuT = lines[1] ? (parseInt(lines[1])/1000).toFixed(1) : 'N/A'; var wifiT = lines[2] ? (parseInt(lines[2])/1000).toFixed(1) : 'N/A'; var tempVal = 'CPU: ' + cpuT + '\\u00b0C  WiFi: ' + wifiT + '\\u00b0C  SW: ' + switchT + '\\u00b0C';"
-sed -i "/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\\		${TEMP_PARSE}" "$JS_FILE"
-sed -i "/_('Architecture'),/a\\			_('Temperature'),      tempVal," "$JS_FILE"
+cat > /tmp/patch_temp.sed << 'SEDEOD'
+/L.resolveDefault(callLuciVersion(), { revision: _('unknown version'), branch: 'LuCI' })/s/$/,/
+/L.resolveDefault(callLuciVersion(), { revision: _('unknown version'), branch: 'LuCI' }),/a\
+			L.resolveDefault(fs.exec('/bin/sh', ['-c', 'cat /sys/class/hwmon/hwmon0/temp1_input /sys/class/hwmon/hwmon1/temp1_input /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null']), { stdout: '' })
+s/luciversion = data\[2\];/luciversion = data[2],\
+		    tempData    = data[3];/
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+		var tempVal = '?';
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+		if (tempData && tempData.stdout) {
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+			var lines = tempData.stdout.trim().split('\\n');
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+			var swT = lines[0] ? (parseInt(lines[0]) \/ 1000).toFixed(1) : '?';
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+			var cpuT = lines[1] ? (parseInt(lines[1]) \/ 1000).toFixed(1) : '?';
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+			var wifiT = lines[2] ? (parseInt(lines[2]) \/ 1000).toFixed(1) : '?';
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+			tempVal = 'CPU: ' + cpuT + '\\u00b0C  WiFi: ' + wifiT + '\\u00b0C  SW: ' + swT + '\\u00b0C';
+/luciversion = luciversion.branch + ' ' + luciversion.revision;/a\
+		}
+/_('Architecture'),/a\
+			_('Temperature'),      tempVal,
+SEDEOD
+
+sed -i -f /tmp/patch_temp.sed "$JS_FILE"
 
 if [ -f "$PO_FILE" ]; then
     if ! grep -q "msgid \"Temperature\"" "$PO_FILE"; then
