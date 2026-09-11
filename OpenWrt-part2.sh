@@ -23,6 +23,10 @@ git clone https://github.com/VizzleTF/luci-theme-footstrap.git package/luci-them
 git clone https://github.com/destan19/luci-app-harbor-file package/luci-app-harbor-file
 git clone https://github.com/chenmozhijin/turboacc.git package/luci-app-turboacc
 git clone https://github.com/bobbyunknown/luci-app-syscontrol.git package/luci-app-syscontrol
+git clone https://github.com/SunBK201/UA3F.git package/UA3F
+git clone https://github.com/destan19/luci-app-harbor-file.git package/luci-app-harbor-file
+git clone https://github.com/whzhni1/luci-app-harbor-file-pro package/luci-app-harbor-file-pro
+git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
