@@ -239,7 +239,7 @@ echo "========================================"
 
 # 自定义作者
 A_author="Luger"
-B_author="Luger ✧*｡٩(ˊᗜˋ*)و✧*｡喵了个咪的
+B_author="Luger ✧*｡٩(ˊᗜˋ*)و✧*｡喵了个咪的"
 sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H")/" package/base-files/files/etc/openwrt_release
 sed -i "s/%R/by $B_author/" package/base-files/files/etc/openwrt_release
 sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H")/" package/base-files/files//usr/lib/os-release
