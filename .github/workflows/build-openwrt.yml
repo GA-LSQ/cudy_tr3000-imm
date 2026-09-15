@@ -113,6 +113,11 @@ jobs:
           cd openwrt
           $GITHUB_WORKSPACE/$DIY_P2_SH
 
+      - name: 🧹 Kill stale tmate sessions
+        run: |
+          pkill -f tmate || true
+          rm -f /tmp/tmate.sock /tmp/tmate-* 2>/dev/null || true
+
       - name: ⌨️ SSH connection to Menuconfig
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 40
