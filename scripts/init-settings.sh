@@ -67,8 +67,8 @@ uci set bandix.dns.enabled='1'
 uci commit bandix
 
 #启用upnp
-uci set upnpd.config.enabled='1'
-uci commit upnpd
+#uci set upnpd.config.enabled='1'
+#uci commit upnpd
 
 #添加候选ntp服务器
 uci del system.ntp.server
