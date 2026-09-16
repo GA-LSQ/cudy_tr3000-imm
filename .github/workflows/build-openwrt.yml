@@ -17,9 +17,6 @@ on:
           - master
           - v24.10.8
           - v24.10.7
-          - v24.10.6
-          - v24.10.5
-          - v24.10.4
           - v25.12.3
           - v25.12.4
           - v25.12.5
@@ -51,6 +48,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   REPO_URL: ${{ github.event.inputs.repo }}
