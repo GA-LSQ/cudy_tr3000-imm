@@ -19,6 +19,11 @@ git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-adv
 git clone https://github.com/GA-LSQ/button.git package/luci-app-button
 git clone https://github.com/MIAOBUSI/luci-theme-vitrawrt.git package/luci-theme-vitrawrt
 git clone https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+git clone https://github.com/VizzleTF/luci-theme-footstrap.git package/luci-theme-footstrap
+git clone https://github.com/whzhni1/luci-app-harbor-file-pro package/luci-app-harbor-file-pro
+git clone https://github.com/SunBK201/UA3F.git package/UA3F
+git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
+git clone https://github.com/Zesuy/UA-Mask.git package/UA-Mask
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 
@@ -232,7 +237,7 @@ echo "========================================"
 # 自定义作者
 A_author="Luger"
 B_author="Luger (=￣ω￣=)喵了个咪"
-sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H%M")/" package/base-files/files/etc/openwrt_release
+sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H")/" package/base-files/files/etc/openwrt_release
 sed -i "s/%R/by $B_author/" package/base-files/files/etc/openwrt_release
-sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H%M")/" package/base-files/files//usr/lib/os-release
+sed -i "s/%D %V %C/%D %V by $A_author $(TZ=UTC-8 date "+%Y%m%d%H")/" package/base-files/files//usr/lib/os-release
 sed -i "s/%R/by $B_author/" package/base-files/files/usr/lib/os-release
