@@ -45,8 +45,8 @@ on:
         required: false
         type: boolean
         default: false
-  schedule:
-    - cron: 0 22 * * 4
+#  schedule:
+#    - cron: 0 22 * * 4
 
 permissions:
   contents: write
@@ -113,7 +113,7 @@ jobs:
           $GITHUB_WORKSPACE/$DIY_P2_SH
 
       - name: ⌨️ SSH connection to Menuconfig
-        uses: mxschmitt/action-tmate@v3
+        uses: owenthereal/action-upterm@v1
         timeout-minutes: 40
 
       - name: 📤 Push config to main branch
@@ -336,4 +336,10 @@ jobs:
             - ${{ env.COMMIT_AUTHOR }}
             - ${{ env.COMMIT_DATE }}
             - ${{ env.COMMIT_MESSAGE }}
-            - ${{ env.COMMIT_HASH }}
+            - ${{ env.COMMIT_HASH }}#      - name: 🚧 Delete old workflow runs
+
+      - name: 🚧 Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          retain_days: 0
+          keep_minimum_runs: 5
