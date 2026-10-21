@@ -52,7 +52,8 @@ sed -i 's/openwrt/Cudy/g' package/base-files/files/bin/config_generate
 # 修改 argon 为默认主题,可根据你喜欢的修改成其他的（不选择那些会自动改变为默认主题的主题才有效果）
 sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 
-
+#修复UA-Mask编译报错
+sed -i 's|^UAMASK_SOURCE_DIR?=.*|UAMASK_SOURCE_DIR?=$(TOPDIR)/package/UA-Mask|' package/UA-Mask/openwrt/package/Makefile
 
 # 修复 gcc14  mbedtls
 sed -i 's|TARGET_CFLAGS := $(filter-out -O%,$(TARGET_CFLAGS)) -Wno-unterminated-string-initialization|TARGET_CFLAGS := $(filter-out -O%,$(TARGET_CFLAGS)) -Wno-unterminated-string-initialization -Wno-error=attributes -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0|' package/libs/mbedtls/Makefile
