@@ -50,6 +50,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   REPO_URL: ${{ github.event.inputs.repo || 'https://github.com/immortalwrt/immortalwrt.git' }}
@@ -336,9 +337,9 @@ jobs:
             - ${{ env.COMMIT_AUTHOR }}
             - ${{ env.COMMIT_DATE }}
             - ${{ env.COMMIT_MESSAGE }}
-            - ${{ env.COMMIT_HASH }}#      - name: 🚧 Delete old workflow runs
+            - ${{ env.COMMIT_HASH }}
 
-      - name: 🚧 Delete old workflow runs
+      - name: Delete old workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
           retain_days: 0
