@@ -27,6 +27,9 @@ git clone https://github.com/Zesuy/UA-Mask.git package/UA-Mask
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 #git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 
+#删imm旧版argon
+rm -rf package/feeds/luci/luci-theme-argon
+
 #使用iStoreOS banner
 curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/istoreos/istoreos/refs/heads/istoreos-22.03/package/base-files/files/etc/banner
 
