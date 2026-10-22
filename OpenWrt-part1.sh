@@ -68,6 +68,9 @@ echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.defa
 
 # turboacc
 curl -sSL https://raw.githubusercontent.com/mufeng05/turboacc/main/add_turboacc.sh -o add_turboacc.sh && bash add_turboacc.sh
+# immortal turboacc补丁冲突解决
+rm -f package/network/utils/nftables/patches/100-nftables-add-fullcone-expression-support.patch
+
 
 # 关机
 #git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
