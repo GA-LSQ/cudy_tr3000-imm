@@ -31,6 +31,7 @@ git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 # 删imm旧版插件防冲突
 rm -rf package/feeds/luci/luci-theme-argon
 rm -rf package/feeds/packages/open-app-filter
+rm -rf package/feeds/luci/luci-app-appfilter
 rm -rf package/feeds/luci/luci-app-argon-config
 
 
