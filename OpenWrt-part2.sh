@@ -23,12 +23,16 @@ git clone https://github.com/VizzleTF/luci-theme-footstrap.git package/luci-them
 git clone https://github.com/whzhni1/luci-app-harbor-file-pro package/luci-app-harbor-file-pro
 git clone https://github.com/SunBK201/UA3F.git package/UA3F
 git clone https://github.com/Zesuy/UA-Mask.git package/UA-Mask
+git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 #git clone https://github.com/sbwml/luci-app-quickfile package/quickfile
 #git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
-#git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 
-#删imm旧版argon
+
+# 删imm旧版插件防冲突
 rm -rf package/feeds/luci/luci-theme-argon
+rm -rf package/feeds/packages/open-app-filter
+rm -rf package/feeds/luci/luci-app-argon-config
+
 
 #使用iStoreOS banner
 curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/istoreos/istoreos/refs/heads/istoreos-22.03/package/base-files/files/etc/banner
